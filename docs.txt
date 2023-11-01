@@ -1,0 +1,9 @@
+Required Scopes -
+
+
+Roles -
+Firebase Admin SDK Administrator Service Agent	
+Service Account Token Creator
+
+API -
+Identity and Access Management (IAM) API
