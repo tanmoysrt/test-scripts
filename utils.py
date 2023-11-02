@@ -1,20 +1,17 @@
 import json
 import os
 import random
-from dotenv import load_dotenv
 
 import requests
 
-load_dotenv()
 
-token = os.getenv("ACCESS_TOKEN")
 
 
 # ref - https://cloud.google.com/resource-manager/reference/rest/v1/projects#Project
 # Cloud Resource Manager API enable
 def createProject(name:str, bearerToken:str):
     url = "https://cloudresourcemanager.googleapis.com/v1/projects"
-    projectId = name + "-project" + str(random.randint(1000, 9999))
+    projectId = "frappe-"+ name+"-"+ str(random.randint(1000, 9999))
     payload = {
         "projectId": projectId,
         "name": name
@@ -26,10 +23,7 @@ def createProject(name:str, bearerToken:str):
     response = requests.request("POST", url, headers=headers, data=json.dumps(payload))
     if response.status_code != 200:
         raise Exception("failed to create project")
-    responseJson = response.json()
-    return responseJson["name"]
-
-# createProject("test-420", token)
+    return projectId
 
 # ref - https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects/addFirebase
 # enable Firebase Management API
@@ -48,8 +42,8 @@ def addFirebaseToGCPProject(projectId:str, bearerToken:str):
     responseJson = response.json()
     return responseJson["name"]
 
-# Generate Firerbase Service Account Key
-def generateFirebaseServiceAccountKey(projectId:str, bearerToken:str):
+# Generate Firerbase Service Account
+def generateFirebaseServiceAccount(projectId:str, bearerToken:str):
     # Create a service accopunt
     # ref - https://cloud.google.com/iam/docs/reference/rest/v1/projects.serviceAccounts/create
     # Identity and Access Management (IAM) API enable
@@ -71,7 +65,6 @@ def generateFirebaseServiceAccountKey(projectId:str, bearerToken:str):
         raise Exception("failed to create service account")
     responseJson = response.json()
     name = responseJson["name"]
-    print(name)
     uniqueId = responseJson["uniqueId"]
     email = responseJson["email"]
     oauth2ClientId = responseJson["oauth2ClientId"]
@@ -138,10 +131,11 @@ def generateFirebaseServiceAccountKey(projectId:str, bearerToken:str):
         print(response.status_code)
         print(response.text)
         raise Exception("failed to set IAM policy")
-    responseJson = response.json()
+
+    return email
 
 
-def generate_keys_for_service_account(iam_account_detail:str):
+def generateKeysServiceAccount(iam_account_detail:str, token:str):
     url = f"https://iam.googleapis.com/v1/projects/-/serviceAccounts/{iam_account_detail}/keys"
     payload = {}
     headers = {
@@ -154,7 +148,24 @@ def generate_keys_for_service_account(iam_account_detail:str):
         print(response.text)
         raise Exception("failed to generate keys")
     responseJson = response.json()
-    print(responseJson)
+    return responseJson
+
+def revoke_access_token(token:str):
+    url = f"https://oauth2.googleapis.com/revoke?token={token}"
+    payload = {}
+    headers = {}
+    requests.request("POST", url, headers=headers, data=payload)
+
+
+# JUST FOR TESTING PURPOSES
+def getServiceAccount(serviceAccountKeyFile):
+    if os.path.exists(serviceAccountKeyFile):
+        with open(serviceAccountKeyFile, 'r') as f:
+            serviceAccountKey = json.load(f)
+            return serviceAccountKey
+    else:
+        return None
+
 
 # addFirebaseToGCPProject("test-420-project8885", token)
 # generateFirebaseServiceAccountKey("test-420-project8885", token)

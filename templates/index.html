@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hello</title>
+</head>
+<body>
+    <h3>Add New Project</h3>
+    <form method="post">
+        <input type="text" id="project_name" name="project_name" placeholder="Project Name" /><button type="submit">Authorize and Add</button>
+    </form>
+    <br>
+    <span>There will be a temporary authorization to the acount</span><br>
+    <hr>
+    {% if keyfile %}
+        <h3>Service Account Key</h3>
+        <textarea rows="10" cols="100">{{ keyfile }}</textarea>
+    {% endif %}
+</body>
+</html>
