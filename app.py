@@ -3,6 +3,7 @@ import time
 from flask import Flask, redirect, request, render_template
 from google_auth_oauthlib.flow import InstalledAppFlow
 import utils
+import os
 
 
 app = Flask(__name__)
@@ -22,19 +23,42 @@ projectName = '' # tmp
 projectId = '' # tmp
 
 serviceAccountKeyFile = 'serviceAccounKey.json'
+registeredAndroidApps = []
+
+# load the config file if it exists
+if os.path.exists('config.json'):
+    with open('config.json', 'r') as f:
+        registeredAndroidApps = json.loads(f.read())
+
 # END ---- JUST FOR TESTING PURPOSES
 
 
 @app.get('/')
 def index():
     keyfile = utils.getServiceAccount(serviceAccountKeyFile)
-    return render_template('index.html', keyfile=keyfile)
+    return render_template('index.html', keyfile=keyfile, registeredAndroidApps=registeredAndroidApps)
 
 @app.post('/')
 def create_project():
     global projectName
-    projectName = request.form['project_name']
-    return redirect('/auth/google')
+    action = request.form['action']
+    if action == 'add_project':
+        projectName = request.form['project_name']
+        return redirect('/auth/google')
+    elif action == 'register_android':
+        package_name = request.form['package_name']
+        config = utils.registerAndroidApp(package_name, serviceAccountKeyFile)
+        global registeredAndroidApps
+        registeredAndroidApps.append({
+            'package_name': package_name,
+            'config': config
+        })
+        # dump the config to a file
+        with open('config.json', 'w') as f:
+            f.write(json.dumps(registeredAndroidApps, indent=4))
+        return redirect('/')
+    
+    return redirect('/')
 
 @app.get('/auth/google')
 def auth_google():

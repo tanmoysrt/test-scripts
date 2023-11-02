@@ -1,9 +1,11 @@
+import base64
 import json
 import os
 import random
 
 import requests
-
+import firebase_admin
+from firebase_admin import project_management
 
 
 
@@ -148,7 +150,19 @@ def generateKeysServiceAccount(iam_account_detail:str, token:str):
         print(response.text)
         raise Exception("failed to generate keys")
     responseJson = response.json()
-    return responseJson
+    privateKeyData = responseJson["privateKeyData"]
+    # base64 decode
+    privateKeyData = privateKeyData.encode('ascii')
+    privateKeyData = base64.b64decode(privateKeyData)
+    privateKeyData = privateKeyData.decode('ascii')
+    return json.loads(privateKeyData)
+
+def registerAndroidApp(packageName:str, serviceAccountConfigFile):
+    credential = firebase_admin.credentials.Certificate(serviceAccountConfigFile)
+    firebase_admin.initialize_app(credential)
+    #  register android app
+    app = project_management.create_android_app(packageName)
+    return app.get_config()
 
 def revoke_access_token(token:str):
     url = f"https://oauth2.googleapis.com/revoke?token={token}"
@@ -170,3 +184,4 @@ def getServiceAccount(serviceAccountKeyFile):
 # addFirebaseToGCPProject("test-420-project8885", token)
 # generateFirebaseServiceAccountKey("test-420-project8885", token)
 # generate_keys_for_service_account("firebase-adminsdk-5382@test-420-project8885.iam.gserviceaccount.com")
+# registerAndroidApp("com.example.test456", "serviceAccounKey.json")

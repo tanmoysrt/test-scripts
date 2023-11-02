@@ -8,6 +8,7 @@
 <body>
     <h3>Add New Project</h3>
     <form method="post">
+        <input type="hidden" name="action" value="add_project" />
         <input type="text" id="project_name" name="project_name" placeholder="Project Name" /><button type="submit">Authorize and Add</button>
     </form>
     <br>
@@ -16,6 +17,18 @@
     {% if keyfile %}
         <h3>Service Account Key</h3>
         <textarea rows="10" cols="100">{{ keyfile }}</textarea>
+        <hr>
+        <h3>Register Android Apps</h3>
+        <form method="post">
+            <input type="hidden" name="action" value="register_android" />
+            <input type="text" id="package_name" name="package_name" placeholder="Package Name" /><button type="submit">Register</button>
+        </form>
+        <br>
+        <h3>Configure App with Configuration</h3>
+        {% for app in registeredAndroidApps   %}
+        <h4>> {{ app.package_name }}</h4>
+        <textarea rows="10" cols="100">{{ app.config }}</textarea>
+        {%  endfor %}
     {% endif %}
 </body>
 </html>
