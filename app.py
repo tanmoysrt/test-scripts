@@ -86,7 +86,7 @@ def auth_callback():
     print(projectId)
 
     # delay for 5 seconds
-    time.sleep(3)
+    time.sleep(7)
 
     # add firebase to the project
     utils.addFirebaseToGCPProject(projectId, access_token)
